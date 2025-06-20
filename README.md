@@ -14,7 +14,7 @@ A lightweight Node.js package for scraping Google Trends data from India, US and
 ## Installation
 
 ```bash
-npm install google-trends-LiteLo
+npm install google-trends-litelo
 ```
 
 ## Quick Start
