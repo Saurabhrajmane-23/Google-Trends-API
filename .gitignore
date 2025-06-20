@@ -33,3 +33,17 @@ typings/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Project specific
+*.csv
+*.txt
+*.md.bak
+temp/
+test-results/
+benchmark-results/
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~

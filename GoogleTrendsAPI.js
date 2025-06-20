@@ -83,85 +83,254 @@ class GoogleTrendsAPI {
           timeout: 60000,
         });
 
+        // Wait for the trending content to load
+        console.log("Waiting for table to load...");
         await page.waitForSelector("table", { timeout: 30000 });
-        await this.delay(2000);
 
-        // Extract trending topics
-        const trends = await page.evaluate((limit) => {
-          const trends = [];
+        // Additional wait for dynamic content and JavaScript to execute
+        await this.delay(5000);
 
+        // Try to wait for specific trend content
+        try {
+          await page.waitForSelector('tbody[jsname="cC57zf"]', {
+            timeout: 10000,
+          });
+          console.log("Found tbody with trends data");
+        } catch (e) {
+          console.log("tbody not found, trying alternative selectors");
           try {
-            const rows = document.querySelectorAll("tr[jsname]");
-            console.log(`Found ${rows.length} trend rows`);
+            await page.waitForSelector("tr[jsname]", { timeout: 10000 });
+            console.log("Found tr elements with jsname");
+          } catch (e2) {
+            console.log("No tr elements with jsname found");
+          }
+        }
 
-            rows.forEach((row, index) => {
-              if (trends.length >= limit) return;
+        // Extract trending topics with detailed debugging
+        const result = await page.evaluate(
+          (limit, geo, hours) => {
+            const trends = [];
+            const debugInfo = [];
 
-              try {
-                const tdElements = row.querySelectorAll("td");
-                if (tdElements.length >= 2) {
-                  const secondTd = tdElements[1];
-                  const trendDiv = secondTd.querySelector(
-                    'div[class*="mZ3RIc"]'
+            try {
+              debugInfo.push("Starting page evaluation...");
+
+              // First, let's try to find the table body
+              const tbody = document.querySelector('tbody[jsname="cC57zf"]');
+              if (tbody) {
+                debugInfo.push('Found tbody with jsname="cC57zf"');
+                const rows = tbody.querySelectorAll("tr[jsname]");
+                debugInfo.push(`Found ${rows.length} trend rows in tbody`);
+
+                rows.forEach((row, index) => {
+                  if (trends.length >= limit) return;
+
+                  try {
+                    // Look for the trend content in the second td
+                    const tds = row.querySelectorAll("td");
+                    debugInfo.push(
+                      `Row ${index}: Found ${tds.length} td elements`
+                    );
+
+                    if (tds.length >= 2) {
+                      const secondTd = tds[1];
+                      debugInfo.push(`Row ${index}: Processing second td`);
+
+                      // Try multiple selectors for the trend text
+                      let trendText = null;
+
+                      // Try div with class containing "mZ3RIc"
+                      const mZ3RIcDiv = secondTd.querySelector(
+                        'div[class*="mZ3RIc"]'
+                      );
+                      if (mZ3RIcDiv) {
+                        trendText = mZ3RIcDiv.textContent.trim();
+                        debugInfo.push(
+                          `Row ${index}: Found mZ3RIc div with text: "${trendText}"`
+                        );
+                      }
+
+                      // Fallback: try any div that's not a metadata div
+                      if (!trendText) {
+                        const divs = secondTd.querySelectorAll("div");
+                        debugInfo.push(
+                          `Row ${index}: Fallback - found ${divs.length} divs in second td`
+                        );
+
+                        for (let i = 0; i < divs.length; i++) {
+                          const div = divs[i];
+                          const text = div.textContent.trim();
+                          debugInfo.push(
+                            `Row ${index}, Div ${i}: "${text}" (classes: "${div.className}")`
+                          );
+
+                          // Skip divs that contain metadata like "ago" or "searches"
+                          if (
+                            text &&
+                            text.length > 2 &&
+                            !text.includes("ago") &&
+                            !text.includes("searches") &&
+                            !text.includes("24h") &&
+                            !text.includes("48h") &&
+                            !text.includes("7d") &&
+                            !div.classList.contains("Rz403")
+                          ) {
+                            trendText = text;
+                            debugInfo.push(
+                              `Row ${index}: Selected trend text: "${trendText}"`
+                            );
+                            break;
+                          }
+                        }
+                      }
+
+                      if (trendText && trendText.length > 0) {
+                        trends.push({
+                          rank: index + 1,
+                          title: trendText,
+                          country: geo,
+                          timeRange: `${hours}h`,
+                          scrapedAt: new Date().toISOString(),
+                        });
+                        debugInfo.push(
+                          `Successfully added trend ${index + 1}: ${trendText}`
+                        );
+                      } else {
+                        debugInfo.push(
+                          `Row ${index}: No valid trend text found`
+                        );
+                      }
+                    }
+                  } catch (error) {
+                    debugInfo.push(
+                      `Error processing row ${index}: ${error.message}`
+                    );
+                  }
+                });
+              } else {
+                debugInfo.push('tbody with jsname="cC57zf" not found');
+              }
+
+              // Fallback: try alternative methods if tbody approach didn't work
+              if (trends.length === 0) {
+                debugInfo.push("Trying alternative selectors...");
+
+                // Try direct table row selectors
+                const alternativeSelectors = [
+                  'table tr[jsname] td:nth-child(2) div[class*="mZ3RIc"]',
+                  'table tr[jsname] td:nth-child(2) div:not([class*="Rz403"])',
+                  "tr[jsname] td:nth-child(2) div",
+                  'table tr td div[class*="mZ3RIc"]',
+                  "tbody tr td:nth-child(2) div",
+                ];
+
+                for (const selector of alternativeSelectors) {
+                  const elements = document.querySelectorAll(selector);
+                  debugInfo.push(
+                    `Selector "${selector}" found ${elements.length} elements`
                   );
 
-                  if (trendDiv) {
-                    const title = trendDiv.textContent.trim();
-                    if (title && title.length > 0) {
+                  elements.forEach((element, index) => {
+                    if (trends.length >= limit) return;
+
+                    const text = element.textContent.trim();
+                    debugInfo.push(
+                      `Alternative selector element ${index}: "${text}"`
+                    );
+
+                    if (
+                      text &&
+                      text.length > 2 &&
+                      !text.includes("ago") &&
+                      !text.includes("searches") &&
+                      !text.includes("24h") &&
+                      !text.includes("48h") &&
+                      !text.includes("7d")
+                    ) {
                       trends.push({
-                        rank: index + 1,
-                        title: title,
+                        rank: trends.length + 1,
+                        title: text,
                         country: geo,
                         timeRange: `${hours}h`,
                         scrapedAt: new Date().toISOString(),
                       });
+                      debugInfo.push(`Alternative method found trend: ${text}`);
                     }
+                  });
+
+                  if (trends.length > 0) {
+                    debugInfo.push(
+                      `Successfully found ${trends.length} trends using selector: ${selector}`
+                    );
+                    break;
                   }
                 }
-              } catch (error) {
-                console.error(`Error processing row ${index}:`, error);
               }
-            });
 
-            // Fallback selectors if no trends found
-            if (trends.length === 0) {
-              const alternativeSelectors = [
-                "tr td:nth-child(2) div",
-                "tr[data-row-id] td:nth-child(2)",
-                'tr td div[class*="mZ3RIc"]',
-                'tr td div:not([class*="Rz403"])',
-              ];
+              // Debug: log page structure if still no trends found
+              if (trends.length === 0) {
+                debugInfo.push("No trends found, debugging page structure...");
 
-              for (const selector of alternativeSelectors) {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach((element, index) => {
-                  if (trends.length >= limit) return;
+                // Log table structure
+                const tables = document.querySelectorAll("table");
+                debugInfo.push(`Found ${tables.length} tables`);
 
-                  const text = element.textContent.trim();
-                  if (
-                    text &&
-                    text.length > 2 &&
-                    !text.includes("ago") &&
-                    !text.includes("searches")
-                  ) {
-                    trends.push({
-                      rank: index + 1,
-                      title: text,
-                      country: geo,
-                      timeRange: `${hours}h`,
-                      scrapedAt: new Date().toISOString(),
+                tables.forEach((table, tableIndex) => {
+                  if (tableIndex < 2) {
+                    // Only check first 2 tables
+                    const rows = table.querySelectorAll("tr");
+                    debugInfo.push(`Table ${tableIndex}: ${rows.length} rows`);
+
+                    rows.forEach((row, rowIndex) => {
+                      if (rowIndex < 3) {
+                        // Log first 3 rows
+                        const tds = row.querySelectorAll("td");
+                        debugInfo.push(`  Row ${rowIndex}: ${tds.length} tds`);
+
+                        tds.forEach((td, tdIndex) => {
+                          if (tdIndex === 1) {
+                            // Focus on second td
+                            const divs = td.querySelectorAll("div");
+                            debugInfo.push(
+                              `    TD ${tdIndex}: ${divs.length} divs`
+                            );
+
+                            divs.forEach((div, divIndex) => {
+                              if (divIndex < 5) {
+                                // Only log first 5 divs
+                                const text = div.textContent.trim();
+                                if (text && text.length > 0) {
+                                  debugInfo.push(
+                                    `      Div ${divIndex}: "${text}" (classes: ${div.className})`
+                                  );
+                                }
+                              }
+                            });
+                          }
+                        });
+                      }
                     });
                   }
                 });
-                if (trends.length > 0) break;
               }
+            } catch (error) {
+              debugInfo.push(`Error in page evaluation: ${error.message}`);
             }
-          } catch (error) {
-            console.error("Error in page evaluation:", error);
-          }
 
-          return trends.slice(0, limit);
-        }, limit);
+            return {
+              trends: trends.slice(0, limit),
+              debugInfo: debugInfo,
+            };
+          },
+          limit,
+          geo,
+          hours
+        );
+
+        // Log debug information
+        result.debugInfo.forEach((info) => console.log(`[PAGE DEBUG] ${info}`));
+
+        const trends = result.trends;
 
         if (trends.length === 0) {
           throw new Error(

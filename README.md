@@ -1,12 +1,12 @@
-# Google Trends API
+# Google Trends LiteLo V 1.0.0
 
-A Node.js package for scraping Google Trends data from India, US and UK using Puppeteer. This package provides easy-to-use methods to get trending topics for different time periods.
+A lightweight Node.js package for scraping Google Trends data from India, US and UK using Puppeteer. This package provides easy-to-use methods to get trending topics for different time periods. More data will be made accessible with upcoming versions.
 
 ## Features
 
 - 🌍 Support for 3 countries: India, US, UK
 - ⏰ Multiple time ranges: 4 hours, 24 hours, 48 hours, 7 days
-- 📊 Top 25 trending topics for each query
+- 📊 Top 25 trending topics
 - 🔄 Built-in retry mechanism and rate limiting
 - 📦 Simple JSON response format
 - 🚀 Easy to integrate into any Node.js project
@@ -14,13 +14,13 @@ A Node.js package for scraping Google Trends data from India, US and UK using Pu
 ## Installation
 
 ```bash
-npm install google-trends-js
+npm install google-trends-LiteLo
 ```
 
 ## Quick Start
 
 ```javascript
-import { googleTrendsAPI } from "google-trends-api-scraper";
+import { googleTrendsAPI } from "google-trends-LiteLo";
 
 // Get India trends for last 24 hours
 const indiaTrends = await googleTrendsAPI.getIndiaTrends24h();
@@ -103,7 +103,7 @@ console.log(ukTrends);
 ### Basic Usage
 
 ```javascript
-import { googleTrendsAPI } from "google-trends-api-scraper";
+import { googleTrendsAPI } from "google-trends-LiteLo";
 
 async function getTrendingTopics() {
   try {
@@ -125,36 +125,10 @@ async function getTrendingTopics() {
 getTrendingTopics();
 ```
 
-### Using the Generic Method
-
-```javascript
-import { googleTrendsAPI } from "google-trends-api-scraper";
-
-async function getCustomTrends() {
-  try {
-    // Get trends using the generic method
-    const trends = await googleTrendsAPI.getTrends("india", 4, 10);
-
-    if (trends.success) {
-      console.log(`Top ${trends.totalTrends} trends from ${trends.country}:`);
-      trends.trends.forEach((trend) => {
-        console.log(`${trend.rank}. ${trend.title}`);
-      });
-    } else {
-      console.error("Failed to fetch trends:", trends.error);
-    }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
-
-getCustomTrends();
-```
-
 ### Class-based Usage
 
 ```javascript
-import GoogleTrendsAPI from "google-trends-api-scraper";
+import GoogleTrendsAPI from "google-trends-LiteLo";
 
 const trendsAPI = new GoogleTrendsAPI();
 
@@ -173,11 +147,7 @@ fetchTrends();
 ## Requirements
 
 - Node.js >= 16.0.0
-- Chrome/Chromium browser (automatically installed with Puppeteer)
-
-## Rate Limiting
-
-The package includes built-in rate limiting (3 seconds between requests) and retry mechanism (3 attempts) to avoid being blocked by Google Trends.
+- Chrome/Chromium browser
 
 ## Supported Countries
 
@@ -233,4 +203,6 @@ This package scrapes publicly available data from Google Trends. Please use resp
 
 ## Support
 
-If you encounter any issues or have questions, please open an issue on the GitHub repository.
+If you encounter any issues or have questions, contant me via my email.
+
+Email - iamsaurabhrajmane@gmail.com

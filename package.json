@@ -3,20 +3,49 @@
   "version": "1.0.0",
   "description": "A Node.js package for scraping Google Trends data from India, US, and UK",
   "main": "index.js",
+  "types": "index.d.ts",
   "type": "module",
   "scripts": {
     "start": "node index.js",
     "test": "node test.js",
-    "dev": "nodemon index.js"
+    "examples": "node examples.js",
+    "benchmark": "node benchmark.js",
+    "dev": "nodemon index.js",
+    "server": "node server.js",
+    "server:dev": "nodemon server.js"
   },
   "keywords": [
     "google-trends",
     "trends",
     "api",
-    "data"
+    "data",
+    "scraping",
+    "puppeteer",
+    "india",
+    "us",
+    "uk",
+    "trending",
+    "search-trends"
   ],
   "author": "Saurabh Rajmane",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/google-trends-api-scraper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/google-trends-api-scraper/issues"
+  },
+  "homepage": "https://github.com/yourusername/google-trends-api-scraper#readme",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "GoogleTrendsAPI.js",
+    "utils.js",
+    "server.js",
+    "README.md",
+    "package.json"
+  ],
   "dependencies": {
     "puppeteer": "^24.10.2",
     "express": "^4.21.2"
