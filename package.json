@@ -1,15 +1,13 @@
 {
-  "name": "google-trends-api-scraper",
+  "name": "google-trends-litelo",
   "version": "1.0.0",
-  "description": "A Node.js package for scraping Google Trends data from India, US, and UK",
+  "description": "A lightweight Node.js package for scraping Google Trends data from India, US and UK using Puppeteer",
   "main": "index.js",
-  "types": "index.d.ts",
   "type": "module",
   "scripts": {
     "start": "node index.js",
     "test": "node test.js",
     "examples": "node examples.js",
-    "benchmark": "node benchmark.js",
     "dev": "nodemon index.js",
     "server": "node server.js",
     "server:dev": "nodemon server.js"
@@ -18,33 +16,31 @@
     "google-trends",
     "trends",
     "api",
-    "data",
     "scraping",
     "puppeteer",
     "india",
     "us",
     "uk",
     "trending",
-    "search-trends"
+    "search-trends",
+    "data-mining"
   ],
-  "author": "Saurabh Rajmane",
+  "author": "Saurabh Rajmane <iamsaurabhrajmane@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/google-trends-api-scraper.git"
+    "url": "git+https://github.com/Saurabhrajmane-23/Google-Trends-API.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/google-trends-api-scraper/issues"
+    "url": "https://github.com/Saurabhrajmane-23/Google-Trends-API/issues"
   },
-  "homepage": "https://github.com/yourusername/google-trends-api-scraper#readme",
+  "homepage": "https://github.com/Saurabhrajmane-23/Google-Trends-API#readme",
   "files": [
     "index.js",
-    "index.d.ts",
     "GoogleTrendsAPI.js",
     "utils.js",
     "server.js",
-    "README.md",
-    "package.json"
+    "README.md"
   ],
   "dependencies": {
     "puppeteer": "^24.10.2",
