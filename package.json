@@ -1,6 +1,6 @@
 {
   "name": "google-trends-litelo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight Node.js package for scraping Google Trends data from India, US and UK using Puppeteer",
   "main": "index.js",
   "type": "module",
